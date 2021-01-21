@@ -21,3 +21,6 @@ return sub_lengths;
 }
 
 module.exports = find_sub_lengths
+
+
+// have to check for the half rugs 

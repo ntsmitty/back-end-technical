@@ -60,19 +60,30 @@ app.get('/v1/order/:roll_length/:rush', async (req, res) => {
     // starts db connection
     const conn = await connection(db_config).catch(e => {})
 
+
+    // this is assuming there will not be enough rush orders 
     if (rush === 'true') {
         rush_components = await query(conn, query_pending_rush_items).catch(console.log);
-        plan.push(...rush_components)
-    
-        for (rush_component of rush_components) {
-            rush_order_lengths.push(string_to_decimal_length(rush_component.size))
-         }
-     }
 
+        if (rush_components) {
+            plan.push(...rush_components)
+    
+            for (rush_component of rush_components) {
+                rush_order_lengths.push(string_to_decimal_length(rush_component.size))
+            }
+        }
+     }
+     
     if (get_sum(rush_order_lengths) < roll_length) {
         pending_priority_components = await query(conn, query_priority_components).catch(console.log);
-        priority_components = find_sub_lengths(rush_order_lengths, roll_length, pending_priority_components)
-        plan.push(...priority_components)
+            
+        if (pending_priority_components) {
+            priority_components = find_sub_lengths(rush_order_lengths, roll_length, pending_priority_components)
+        }
+            
+        if (priority_components) {
+            plan.push(...priority_components)
+        }
     }
     
     next_to_print.roll_length = roll_length
